@@ -6,14 +6,19 @@ const ScrollToTop = () => {
 
   useEffect(() => {
     const toggleVisibility = () => {
-      setIsVisible(window.pageYOffset > 300)
+      setIsVisible(Math.max(window.pageYOffset, document.body.scrollTop) > 300)
     }
 
     window.addEventListener('scroll', toggleVisibility)
-    return () => window.removeEventListener('scroll', toggleVisibility)
+    document.body.addEventListener('scroll', toggleVisibility)
+    return () => {
+      window.removeEventListener('scroll', toggleVisibility)
+      document.body.removeEventListener('scroll', toggleVisibility)
+    }
   }, [])
 
   const scrollToTop = () => {
+    document.body.scrollTo({ top: 0, behavior: 'smooth' })
     window.scrollTo({
       top: 0,
       behavior: 'smooth'

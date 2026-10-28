@@ -21,6 +21,9 @@ function remarkFenceMaxLinesToLangClass() {
 }
 
 export default defineConfig({
+  server: {
+    watch: { ignored: ['**/.tmp-*/**'] },
+  },
   plugins: [
     mdx({
       remarkPlugins: [remarkGfm, remarkMath, remarkFrontmatter, remarkMdxFrontmatter, remarkFenceMaxLinesToLangClass],
