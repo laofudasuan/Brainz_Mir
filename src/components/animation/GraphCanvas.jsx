@@ -3,7 +3,8 @@ import React, { useState, useRef, useEffect, forwardRef, useImperativeHandle } f
 import AnimateGraph from './animateGraph.jsx';
 import EmptyGraph from '../../data/graphs/EmptyGraph.json';
 
-const GraphCanvas = forwardRef(({ width = 1000, height = 600, graphData = null, isLoading: externalIsLoading, enableDrawing = true, onInit, backgroundImage = null, backgroundColor = 0xE5E5E5 }, ref) => {
+// 默认画布底色是与原先 0xE5E5E5 明度相同的暖灰，图上元素的对比度保持不变。
+const GraphCanvas = forwardRef(({ width = 1000, height = 600, graphData = null, isLoading: externalIsLoading, enableDrawing = true, onInit, backgroundImage = null, backgroundColor = 0xE9E5DC }, ref) => {
   // 状态
   const [currentGraphIndex, setCurrentGraphIndex] = useState(0);
   const [previousGraphIndex, setPreviousGraphIndex] = useState(0); // 上一个图的索引
@@ -258,18 +259,15 @@ const GraphCanvas = forwardRef(({ width = 1000, height = 600, graphData = null, 
   // 渲染加载状态
   if (isLoading) {
     return (
-      <div style={{ width, height }} className="flex items-center justify-center bg-gray-100 rounded-lg">
-        <div className="text-center">
-          <div className="inline-block animate-spin rounded-full h-8 w-8 border-t-2 border-b-2 border-blue-500 mb-2"></div>
-          <p className="text-gray-600">加载中...</p>
-        </div>
+      <div style={{ width, height }} className="flex items-center justify-center bg-gray-100 rounded-xl">
+        <div className="breath" role="status">加载中...</div>
       </div>
     );
   }
   
   // 渲染图
   return (
-    <div style={{ width, height, position: 'relative', overflow: 'hidden' }} className="bg-white rounded-lg border-2 border-gray-300">
+    <div style={{ width, height, position: 'relative', overflow: 'hidden' }} className="bg-white rounded-xl border border-gray-300">
       {
         renderGraphs()
       }
@@ -283,31 +281,34 @@ const GraphCanvas = forwardRef(({ width = 1000, height = 600, graphData = null, 
             left: '50%',
             transform: 'translateX(-50%)',
             display: 'flex',
-            gap: '10px',
-            backgroundColor: 'rgba(255, 255, 255, 0.9)',
-            padding: '10px 15px',
-            borderRadius: '25px',
-            boxShadow: '0 2px 10px rgba(0, 0, 0, 0.1)',
+            gap: '8px',
+            backgroundColor: 'rgba(255, 253, 248, 0.94)',
+            border: '1px solid var(--line)',
+            padding: '8px 12px',
+            borderRadius: '999px',
+            boxShadow: '0 10px 24px -18px rgba(43, 38, 32, 0.45)',
             zIndex: 1000,
             pointerEvents: 'auto'
           }}
         >
           {Array.from({ length: graphDataList.length }).map((_, index) => (
             <button
+              type="button"
               key={index}
               onClick={() => switchToGraph(index)}
+              aria-pressed={index === currentGraphIndex}
               style={{
-                width: '40px',
-                height: '40px',
+                width: '38px',
+                height: '38px',
                 borderRadius: '50%',
-                border: index === currentGraphIndex ? '3px solid #2196F3' : '1px solid #ddd',
-                backgroundColor: index === currentGraphIndex ? '#2196F3' : 'white',
-                color: index === currentGraphIndex ? 'white' : '#333',
+                border: index === currentGraphIndex ? '1px solid var(--sprout)' : '1px solid var(--line-strong)',
+                backgroundColor: index === currentGraphIndex ? 'var(--sprout)' : 'var(--surface)',
+                color: index === currentGraphIndex ? '#FFFFFF' : 'var(--ink-2)',
                 cursor: 'pointer',
+                fontFamily: 'var(--font-mono)',
                 fontSize: '14px',
-                fontWeight: 'bold',
-                transition: 'all 0.5s linear',
-                boxShadow: index === currentGraphIndex ? '0 2px 8px rgba(33, 150, 243, 0.4)' : 'none'
+                fontWeight: 600,
+                transition: 'background-color 0.32s cubic-bezier(.22,.61,.36,1), color 0.32s cubic-bezier(.22,.61,.36,1), border-color 0.32s cubic-bezier(.22,.61,.36,1)'
               }}
               title={`切换到图 ${index + 1}`}
             >

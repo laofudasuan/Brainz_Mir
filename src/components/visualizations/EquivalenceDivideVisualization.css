@@ -1,23 +1,23 @@
-.eq-vis { margin: 1.5rem 0; border: 1px solid #dbe3ee; border-radius: 14px; background: #fff; color: #334155; font-size: 14px; line-height: 1.65; overflow: hidden; }
+.eq-vis { margin: 1.5rem 0; border: 1px solid var(--viz-border); border-radius: var(--viz-radius); background: var(--viz-surface); color: var(--viz-ink); box-shadow: var(--viz-shadow); font-size: 14px; line-height: 1.65; overflow: hidden; }
 .eq-vis * { box-sizing: border-box; }
-.eq-header { display: flex; flex-direction: column; gap: 4px; padding: 16px 20px; background: #f1f5f9; border-bottom: 1px solid #e2e8f0; }
-.eq-header strong { color: #0f172a; font-size: 17px; }
-.eq-header span, .eq-caption, .eq-vis small { color: #64748b; font-size: 12px; }
+.eq-header { display: flex; flex-direction: column; gap: 4px; padding: 16px 20px; background: var(--viz-header-bg); border-bottom: 1px solid var(--viz-hairline); }
+.eq-header strong { color: var(--viz-title); font-family: var(--font-serif); font-size: 17px; font-weight: 600; }
+.eq-header span, .eq-caption, .eq-vis small { color: var(--viz-muted); font-size: 12px; }
 .eq-content { padding: 20px; display: grid; gap: 16px; min-width: 0; }
 .eq-vis p { margin: 0; }
 .eq-controls, .eq-phases, .eq-point-buttons { display: flex; flex-wrap: wrap; gap: 8px; }
 .eq-control { display: flex; align-items: center; flex-wrap: wrap; gap: 8px; min-width: 0; }
-.eq-control select { max-width: 100%; min-width: 0; padding: 6px 9px; border: 1px solid #cbd5e1; border-radius: 6px; background: white; color: #334155; }
+.eq-control select { max-width: 100%; min-width: 0; padding: 6px 9px; border: 1px solid var(--viz-btn-border); border-radius: 8px; background: var(--viz-surface); color: var(--viz-ink); }
 .eq-wide select { width: 100%; }
-.eq-vis button { font: inherit; cursor: pointer; border: 1px solid #cbd5e1; padding: 5px 10px; border-radius: 6px; background: #fff; color: #475569; line-height: 1.5; transition: border-color .15s, background .15s; }
-.eq-vis button:hover:not(:disabled) { border-color: #2563eb; }
-.eq-vis button[aria-pressed="true"], .eq-vis .is-selected { background: #eff6ff; border-color: #2563eb; color: #1d4ed8; box-shadow: inset 0 0 0 1px #2563eb; }
-.eq-vis button:focus-visible, .eq-vis select:focus-visible, .eq-vis input:focus-visible { outline: 2px solid #2563eb; outline-offset: 3px; }
+.eq-vis button { font: inherit; cursor: pointer; border: 1px solid var(--viz-btn-border); padding: 5px 10px; border-radius: 8px; background: var(--viz-surface); color: var(--viz-btn-ink); line-height: 1.5; transition: border-color .32s cubic-bezier(.22,.61,.36,1), background-color .32s cubic-bezier(.22,.61,.36,1), color .18s; }
+.eq-vis button:hover:not(:disabled) { border-color: var(--viz-hover-border); background: var(--viz-hover-bg); }
+.eq-vis button[aria-pressed="true"], .eq-vis .is-selected { background: var(--viz-pressed-bg); border-color: var(--viz-pressed-border); color: var(--viz-pressed-ink); box-shadow: inset 0 0 0 1px var(--viz-pressed-border); }
+.eq-vis button:focus-visible, .eq-vis select:focus-visible, .eq-vis input:focus-visible { outline: 2px solid var(--viz-focus); outline-offset: 3px; }
 .eq-vis button:disabled { opacity: .45; cursor: default; }
 .eq-note { padding: 10px 12px; background: #f8fafc; border-radius: 8px; }
 .eq-stepper { display: flex; align-items: center; gap: 12px; }
 .eq-stepper > label { flex: 1; text-align: center; min-width: 0; font-size: 12px; }
-.eq-stepper input { display: block; width: 100%; accent-color: #2563eb; }
+.eq-stepper input { display: block; width: 100%; accent-color: var(--viz-accent); }
 .eq-stepper button { white-space: nowrap; }
 .eq-two-column { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 18px; align-items: start; }
 .eq-two-column > * { min-width: 0; }
@@ -56,7 +56,7 @@
 .eq-tree-children { display: flex; gap: 8px; padding-top: 14px; margin-top: 8px; border-top: 1px solid #cbd5e1; }
 .eq-tree button { font-size: 12px; white-space: nowrap; }
 .eq-checkbox { display: flex; align-items: start; gap: 8px; font-size: 12px; }
-.eq-checkbox input { margin-top: 4px; accent-color: #2563eb; }
+.eq-checkbox input { margin-top: 4px; accent-color: var(--viz-accent); }
 .eq-class-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(135px, 1fr)); gap: 8px; max-height: 370px; overflow-y: auto; padding: 2px; }
 .eq-vis .eq-class-card { display: flex; flex-direction: column; align-items: start; padding: 10px; text-align: left; font-size: 12px; min-width: 0; overflow-wrap: anywhere; }
 .eq-class-card strong { font-size: 21px; color: #1d4ed8; }

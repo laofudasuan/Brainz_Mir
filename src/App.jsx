@@ -1,9 +1,13 @@
-import { Suspense, lazy, useLayoutEffect } from 'react'
+import { Suspense, lazy, useLayoutEffect, useRef } from 'react'
 import { Routes, Route, useLocation } from 'react-router-dom'
+import { MotionConfig } from 'framer-motion'
 import Navbar from './components/Navbar'
+import Footer from './components/Footer'
 import ScrollToTop from './components/ScrollToTop'
+import Loading from './components/Loading'
 import './index.css'
 import './styles/blog.css'
+import './styles/workbench.css'
 
 const Home = lazy(() => import('./pages/Home'))
 const Articles = lazy(() => import('./pages/Articles'))
@@ -19,17 +23,22 @@ const NotFound = lazy(() => import('./pages/NotFound'))
 
 export default function App() {
   const { pathname } = useLocation()
+  const firstRender = useRef(true)
   useLayoutEffect(() => {
     window.scrollTo({ top: 0, behavior: 'instant' })
-    // Legacy global overflow styles make body the scroll container in Chromium.
     document.body.scrollTo({ top: 0, behavior: 'instant' })
+    // 站内跳转后把键盘焦点放回正文开头，而不是留在已经消失的链接上（首次打开时不移动）。
+    if (firstRender.current) firstRender.current = false
+    else document.getElementById('main-content')?.focus({ preventScroll: true })
   }, [pathname])
+  // 课件地图与课件阅读是全屏的工作台，不显示页脚。
+  const immersive = /^\/courseware(\/|$)/.test(pathname)
 
-  return <>
+  return <MotionConfig reducedMotion="user">
     <a className="skip-link" href="#main-content">跳到正文</a>
     <Navbar />
-    <main id="main-content" tabIndex={-1}>
-      <Suspense fallback={<div className="blog-page" role="status">正在打开这一页…</div>}>
+    <main id="main-content" className="site-main" tabIndex={-1}>
+      <Suspense fallback={<div className="page"><Loading label="正在打开这一页…" block /></div>}>
         <Routes>
           <Route path="/" element={<Home />} />
           <Route path="/articles" element={<Articles />} />
@@ -46,7 +55,7 @@ export default function App() {
         </Routes>
       </Suspense>
     </main>
-    <footer className="site-footer"><span>老虎大蒜的小站</span><span>学习、折腾，也记录生活。</span><span>湘ICP备2025147087号</span></footer>
+    {!immersive && <Footer />}
     <ScrollToTop />
-  </>
+  </MotionConfig>
 }

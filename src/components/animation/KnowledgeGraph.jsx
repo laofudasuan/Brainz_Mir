@@ -3,6 +3,7 @@ import * as THREE from 'three';
 import { OrbitControls } from 'three/examples/jsm/controls/OrbitControls';
 import { knowledgeGraphApi } from '../../services/apiService';
 import { knowledgeGraphData } from '../../data/knowledge-graph/mockData';
+import Loading from '../Loading';
 
 const KnowledgeGraph = () => {
   const containerRef = useRef(null);
@@ -31,7 +32,7 @@ const KnowledgeGraph = () => {
     
     // 创建场景
     const scene = new THREE.Scene();
-    scene.background = new THREE.Color(0x1a1a2e);
+    scene.background = new THREE.Color(0x1e1a16); // 与页面的“夜窗”同色（--night）
     sceneRef.current = scene;
     
     // 创建相机
@@ -424,7 +425,7 @@ const KnowledgeGraph = () => {
       {/* 加载覆盖层 */}
       {isLoading && (
         <div className="absolute inset-0 flex items-center justify-center text-white z-10 bg-gray-900 bg-opacity-90">
-          <div className="text-xl">加载3D知识图谱中...</div>
+          <Loading label="加载3D知识图谱中..." night />
         </div>
       )}
       
@@ -445,7 +446,7 @@ const KnowledgeGraph = () => {
             <strong>类型：</strong>{getTypeLabel(selectedNode.type)}
           </p>
           <button 
-            className="mt-2 px-4 py-1 bg-blue-600 hover:bg-blue-700 rounded text-white transition-colors"
+            className="mt-2 px-4 py-1 bg-primary hover:bg-primary/90 rounded-full text-white transition-colors"
             onClick={resetView}
           >
             返回全局视图
@@ -462,22 +463,26 @@ const KnowledgeGraph = () => {
       
       {/* 控制按钮 */}
       <div className="absolute bottom-4 right-4 z-10 flex flex-col gap-2">
-        <button 
-          className="p-3 bg-gray-800 bg-opacity-80 hover:bg-opacity-100 rounded-full shadow-lg transition-opacity"
+        <button
+          type="button"
+          className="p-3 bg-gray-800 bg-opacity-80 hover:bg-opacity-100 rounded-full shadow-lg transition-opacity text-gray-100"
           onClick={resetView}
           title="重置视图"
+          aria-label="重置视图"
         >
-          🔄
+          <svg className="h-5 w-5" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
+            <path d="M4 12a8 8 0 1 0 2.4-5.7M4 4v4.5h4.5" />
+          </svg>
         </button>
       </div>
-      
+
       {/* 使用说明 */}
-      <div className="absolute bottom-4 left-4 p-3 bg-gray-800 bg-opacity-80 rounded-lg shadow-lg z-10 text-sm text-gray-300 max-w-sm">
-        <p>💡 点击任意节点进行空间穿梭</p>
-        <p>🕹️ 可拖动旋转视图，滚轮缩放</p>
-        <p>🔄 点击重置按钮返回全局视图</p>
-        <p>👆 悬停节点查看标签</p>
-      </div>
+      <ul className="absolute bottom-4 left-4 p-3 pl-7 bg-gray-800 bg-opacity-80 rounded-xl shadow-lg z-10 text-sm leading-7 text-gray-300 max-w-sm list-disc marker:text-accent">
+        <li>点击任意节点进行空间穿梭</li>
+        <li>可拖动旋转视图，滚轮缩放</li>
+        <li>点击重置按钮返回全局视图</li>
+        <li>悬停节点查看标签</li>
+      </ul>
     </div>
   );
 };

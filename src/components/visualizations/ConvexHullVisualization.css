@@ -1,19 +1,19 @@
-.hull-vis { margin: 24px 0; border: 1px solid #dbe3ee; border-radius: 12px; background: #fff; color: #334155; font-size: 14px; line-height: 1.7; overflow: hidden; }
+.hull-vis { margin: 24px 0; border: 1px solid var(--viz-border); border-radius: var(--viz-radius); background: var(--viz-surface); color: var(--viz-ink); box-shadow: var(--viz-shadow); font-size: 14px; line-height: 1.7; overflow: hidden; }
 .hull-vis * { box-sizing: border-box; }
-.hull-vis header { padding: 14px 18px; background: #f1f5f9; font-size: 17px; font-weight: 650; color: #0f172a; border-bottom: 1px solid #e2e8f0; }
+.hull-vis header { padding: 14px 18px; font-size: 17px; font-weight: 600; background: var(--viz-header-bg); border-bottom: 1px solid var(--viz-hairline); color: var(--viz-title); font-family: var(--font-serif); }
 .hull-content { padding: 18px; display: grid; gap: 14px; min-width: 0; }
 .hull-vis p { margin: 0; }
-.hull-vis small { font-size: 12px; color: #64748b; }
-.hull-vis button { padding: 5px 11px; border: 1px solid #cbd5e1; border-radius: 6px; background: #fff; color: #475569; font: inherit; cursor: pointer; }
-.hull-vis button:hover:not(:disabled) { border-color: #2563eb; }
-.hull-vis button[aria-pressed="true"] { color: #1d4ed8; background: #eff6ff; border-color: #2563eb; }
+.hull-vis small { font-size: 12px; color: var(--viz-muted); }
+.hull-vis button { padding: 5px 11px; border: 1px solid var(--viz-btn-border); border-radius: 8px; background: var(--viz-surface); color: var(--viz-btn-ink); font: inherit; cursor: pointer; transition: border-color .32s cubic-bezier(.22,.61,.36,1), background-color .32s cubic-bezier(.22,.61,.36,1), color .18s; }
+.hull-vis button:hover:not(:disabled) { border-color: var(--viz-hover-border); background: var(--viz-hover-bg); }
+.hull-vis button[aria-pressed="true"] { color: var(--viz-pressed-ink); background: var(--viz-pressed-bg); border-color: var(--viz-pressed-border); }
 .hull-vis button:disabled { opacity: .4; cursor: default; }
-.hull-vis :is(button, input, select):focus-visible { outline: 2px solid #2563eb; outline-offset: 3px; }
-.hull-vis input[type="range"] { width: 100%; display: block; accent-color: #2563eb; margin-top: 5px; }
-.hull-vis select { border: 1px solid #cbd5e1; border-radius: 6px; background: #fff; color: #334155; padding: 6px 9px; max-width: 100%; min-width: 0; }
+.hull-vis :is(button, input, select):focus-visible { outline: 2px solid var(--viz-focus); outline-offset: 3px; }
+.hull-vis input[type="range"] { width: 100%; display: block; accent-color: var(--viz-accent); margin-top: 5px; }
+.hull-vis select { border: 1px solid var(--viz-btn-border); border-radius: 8px; background: var(--viz-surface); color: var(--viz-ink); padding: 6px 9px; max-width: 100%; min-width: 0; }
 .hull-select, .hull-controls, .hull-buttons { display: flex; flex-wrap: wrap; gap: 8px; align-items: center; min-width: 0; }
 .hull-select select { flex: 1; min-width: 120px; }
-.hull-controls span { font-size: 12px; color: #64748b; margin: 0 4px; }
+.hull-controls span { font-size: 12px; color: var(--viz-muted); margin: 0 4px; }
 .hull-two-columns { display: grid; grid-template-columns: minmax(0, 1.15fr) minmax(0, 1fr); gap: 18px; align-items: start; }
 .hull-two-columns > * { min-width: 0; }
 .hull-notes { display: grid; gap: 14px; }

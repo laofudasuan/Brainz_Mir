@@ -1,70 +1,64 @@
 import React, { useState, useEffect, useMemo } from 'react';
-import { useNavigate } from 'react-router-dom';
+import { Link, useNavigate, useSearchParams } from 'react-router-dom';
 import { motion, AnimatePresence } from 'framer-motion';
 import ReactFlow, { MiniMap, Controls, Background, ReactFlowProvider, useNodesState, useEdgesState, useViewport, MarkerType } from 'reactflow';
 import 'reactflow/dist/style.css';
 import CoursewareNode from '../components/flow/CoursewareNode.jsx';
 import '../styles/reactflow-overrides.css';
 import { CATEGORY_COLORS } from '../constants/categories.js';
+import Loading from '../components/Loading';
+import useDocumentTitle from '../components/useDocumentTitle';
 
 const nodeTypes = { courseware: CoursewareNode };
+const EDGE_COLOR = '#8A7C66';
+const calm = { duration: 0.36, ease: [0.22, 0.61, 0.36, 1] };
+// 数据里缺省的占位文字不再展示给读者
+const shown = (value, placeholder) => (value && value !== placeholder ? value : '');
 
 const OverlayCards = ({ cards, onNavigate, onClose }) => {
   const { x, y, zoom } = useViewport();
   return (
     <AnimatePresence>
-      {cards.map((card) => (
-        <motion.div
-          key={card.id}
-          initial={{ scale: 0, opacity: 0 }}
-          animate={{ scale: 1, opacity: 1 }}
-          exit={{ scale: 0, opacity: 0 }}
-          transition={{ type: 'spring', stiffness: 260, damping: 22 }}
-          className="absolute z-50"
-          style={{ left: (card.nodeX || 0) * zoom + (x || 0) - 180, top: (card.nodeY || 0) * zoom + (y || 0) - 100 }}
-        >
-          <div className="bg-white rounded-xl shadow-2xl w-[360px] border">
-            <div className="p-4">
-              <h3 className="text-xl font-bold mb-1">{card.data.title}</h3>
-              <p className="text-gray-700 mb-3">{card.data.description}</p>
-              <div className="flex items-center justify-between text-sm text-gray-500 mb-4">
-                <span>作者：{card.data.author}</span>
-                <span>时间：{card.data.createdAt}</span>
-              </div>
-              <div className="flex gap-3 justify-end">
-                <button
-                  onClick={() => onNavigate(card.id)}
-                  className="px-3 py-2 rounded-md bg-blue-600 hover:bg-blue-700 text-white flex items-center justify-center"
-                  title="打开"
-                >
-                  <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5" viewBox="0 0 20 20" fill="currentColor">
-                    <path fillRule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zM9.555 7.168A1 1 0 008 8v4a1 1 0 001.555.832l3-2a1 1 0 000-1.664l-3-2z" clipRule="evenodd" />
-                  </svg>
-                </button>
-                <button
-                  onClick={() => onClose(card.id)}
-                  className="px-3 py-2 rounded-md bg-gray-200 hover:bg-gray-300 flex items-center justify-center"
-                  title="关闭"
-                >
-                  <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5" viewBox="0 0 20 20" fill="currentColor">
-                    <path fillRule="evenodd" d="M4.293 4.293a1 1 0 011.414 0L10 8.586l4.293-4.293a1 1 0 111.414 1.414L11.414 10l4.293 4.293a1 1 0 01-1.414 1.414L10 11.414l-4.293 4.293a1 1 0 01-1.414-1.414L8.586 10 4.293 5.707a1 1 0 010-1.414z" clipRule="evenodd" />
-                  </svg>
-                </button>
+      {cards.map((card) => {
+        const description = shown(card.data.description, '暂无描述');
+        return (
+          <motion.div
+            key={card.id}
+            initial={{ scale: 0.96, opacity: 0, y: 6 }}
+            animate={{ scale: 1, opacity: 1, y: 0 }}
+            exit={{ scale: 0.98, opacity: 0 }}
+            transition={calm}
+            className="cw-card-anchor"
+            style={{ left: (card.nodeX || 0) * zoom + (x || 0) - 170, top: (card.nodeY || 0) * zoom + (y || 0) - 100 }}
+          >
+            <div className="cw-card" role="group" aria-label={card.data.title}>
+              <h3>{card.data.title}</h3>
+              {description && description !== card.data.title && <p>{description}</p>}
+              <dl className="cw-card-meta">
+                <div><dt>作者</dt><dd>{card.data.author}</dd></div>
+                <div><dt>时间</dt><dd>{card.data.createdAt}</dd></div>
+              </dl>
+              <div className="cw-card-actions">
+                <button type="button" onClick={() => onClose(card.id)} className="btn btn-quiet btn-small">收起</button>
+                <button type="button" onClick={() => onNavigate(card.id)} className="btn btn-primary btn-small">打开课件 <span className="arrow" aria-hidden="true">→</span></button>
               </div>
             </div>
-          </div>
-        </motion.div>
-      ))}
+          </motion.div>
+        );
+      })}
     </AnimatePresence>
   );
 };
 
 const CoursewareList = () => {
+  useDocumentTitle('算法课件');
   const [coursewares, setCoursewares] = useState([]);
   const [loading, setLoading] = useState(true);
   const [mapConfig, setMapConfig] = useState(null);
   const [openCards, setOpenCards] = useState([]);
   const navigate = useNavigate();
+  const [params, setParams] = useSearchParams();
+  const view = params.get('view') === 'list' ? 'list' : 'map';
 
   const [nodes, setNodes, onNodesChange] = useNodesState([]);
   const [edges, setEdges, onEdgesChange] = useEdgesState([]);
@@ -77,6 +71,8 @@ const CoursewareList = () => {
         const mapById = {};
         Object.entries(jsonFiles).forEach(([filepath, module]) => {
           const id = filepath.split('/').pop().replace('.json', '');
+          // 地图配置本身也在这个目录里，它不是一份课件
+          if (id === 'courseware-map') return;
           const data = module.default || module;
           const title = data?.title || '未知标题';
           const description = data?.description || '暂无描述';
@@ -117,7 +113,6 @@ const CoursewareList = () => {
         position: { x: n.x, y: n.y },
         data: { label, category: n.category },
         draggable: false,
-        style: { borderRadius: 12, border: '2px solid #e6e6e6ff', color: '#000000', fontWeight: 700, padding: '8px 12px' },
         className: 'courseware-node',
       };
     });
@@ -128,12 +123,31 @@ const CoursewareList = () => {
       sourceHandle: e.sourceSide || null,
       targetHandle: e.targetSide || null,
       label: e.label || undefined,
-      style: { stroke: '#A0AEC0', strokeWidth: 3 },
-      markerEnd: { type: MarkerType.ArrowClosed, color: '#A0AEC0' },
+      style: { stroke: EDGE_COLOR, strokeWidth: 2 },
+      markerEnd: { type: MarkerType.ArrowClosed, color: EDGE_COLOR },
     }));
     setNodes(nextNodes);
     setEdges(nextEdges);
   }, [mapConfig, coursewares, setNodes, setEdges]);
+
+  // 图例只列出地图上真正出现的分类；列表视图与地图收录同一批课件：
+  // 地图上暂时没有内容的节点不列出，不在地图上的课件也保持原样，只能通过原链接访问。
+  const groups = useMemo(() => {
+    const byId = Object.fromEntries(coursewares.map((c) => [c.id, c]));
+    const result = [];
+    (mapConfig?.nodes || []).forEach((n) => {
+      const item = byId[n.id];
+      if (!item) return;
+      const name = n.category || '其他';
+      let group = result.find((g) => g.name === name);
+      if (!group) {
+        group = { name, color: CATEGORY_COLORS[name] || 'var(--ink-4)', items: [] };
+        result.push(group);
+      }
+      group.items.push(item);
+    });
+    return result;
+  }, [coursewares, mapConfig]);
 
   const onNodeClick = (_e, node) => {
     const data = coursewares.find((c) => c.id === node.id);
@@ -147,93 +161,97 @@ const CoursewareList = () => {
     });
   };
 
-  const containerVariants = useMemo(() => ({
-    hidden: { opacity: 0 },
-    visible: { opacity: 1, transition: { staggerChildren: 0.1 } },
-  }), []);
+  const switchView = (next) => {
+    const nextParams = new URLSearchParams(params);
+    if (next === 'list') nextParams.set('view', 'list');
+    else nextParams.delete('view');
+    setParams(nextParams, { replace: true });
+  };
+
+  const total = groups.reduce((sum, g) => sum + g.items.length, 0);
 
   return (
-    <div className="fixed inset-0 overflow-hidden">
-      <div className="w-full h-full px-0">
-        <motion.div
-          className="page-content w-full h-full max-w-none"
-          initial={{ opacity: 0, y: 20 }}
-          animate={{ opacity: 1, y: 0 }}
-          transition={{ duration: 0.8, ease: 'easeOut' }}
-          variants={containerVariants}
-        >
-          {loading ? (
-            <div className="flex items-center justify-center w-full h-full">
-              <div className="animate-spin rounded-full h-12 w-12 border-t-2 border-b-2 border-primary"></div>
-            </div>
-          ) : (
-            <div className="w-full h-full overflow-hidden relative">
-              <ReactFlowProvider>
-                <ReactFlow
-                  nodes={nodes}
-                  edges={edges}
-                  onNodesChange={onNodesChange}
-                  onEdgesChange={onEdgesChange}
-                  onNodeClick={onNodeClick}
-                  nodeTypes={nodeTypes}
-                  fitView
-                  minZoom={0.2}
-                  maxZoom={4}
-                  proOptions={{ hideAttribution: true }}
-                >
-                  <MiniMap pannable zoomable style={{ right: 0, bottom: 0, width: 180, height: 120 }} />
-                  <Controls position="bottom-right" showInteractive={false} showZoom={true} showFitView={true} style={{ right: 16, bottom: 116 }} />
-                  <Background color="#f3f4f6" variant="dots" gap={16} size={1} />
-                  <div
-                    style={{
-                      position: 'absolute',
-                      left: 4,
-                      top: 4,
-                      background: '#ffffff',
-                      borderRadius: 8,
-                      boxShadow: '0 8px 16px rgba(0,0,0,0.12)',
-                      border: '1px solid #e5e7eb',
-                      padding: '8px 10px',
-                      display: 'flex',
-                      flexDirection: 'row',
-                      gap: 8,
-                      alignItems: 'flex-start',
-                      zIndex: 10,
-                    }}
-                  >
-                    {Object.entries(CATEGORY_COLORS).map(([name, color]) => (
-                      <div key={name} style={{ display: 'flex', alignItems: 'center', gap: 6 }}>
-                        <span
-                          style={{
-                            width: 10,
-                            height: 10,
-                            borderRadius: '50%',
-                            background: color,
-                            display: 'inline-block',
-                          }}
-                        />
-                        <span style={{ fontSize: 12, color: '#374151' }}>{name}</span>
-                      </div>
-                    ))}
-                  </div>
-                </ReactFlow>
-                <OverlayCards
-                  cards={openCards}
-                  onNavigate={(id) => navigate(`/courseware/${id}`)}
-                  onClose={(id) => setOpenCards((prev) => prev.filter((c) => c.id !== id))}
-                />
-              </ReactFlowProvider>
-            </div>
-          )}
+    <div className="cw-shell">
+      <div className="cw-bar">
+        <div className="cw-bar-title">
+          <h1>算法课件</h1>
+          {!loading && <p className="cw-bar-hint">{total} 份课件 · {view === 'map' ? '拖动平移、滚轮或双指缩放，点一下课件看看简介' : '按分类排列，点开即可阅读'}</p>}
+        </div>
+        {!loading && groups.length > 0 && (
+          <div className="cw-legend" aria-label="分类图例">
+            {groups.map((g) => <span key={g.name} style={{ '--dot': g.color }}><i aria-hidden="true" />{g.name}<b>{g.items.length}</b></span>)}
+          </div>
+        )}
+        <div className="segmented" role="group" aria-label="浏览方式">
+          <button type="button" aria-pressed={view === 'map'} onClick={() => switchView('map')}>地图</button>
+          <button type="button" aria-pressed={view === 'list'} onClick={() => switchView('list')}>列表</button>
+        </div>
+      </div>
 
-          {!loading && coursewares.length === 0 && (
-            <div className="bg-white rounded-xl shadow-md p-8">
-              <div className="text-center py-12">
-                <p className="text-gray-500">暂无可用内容</p>
-              </div>
+      <div className="cw-stage">
+        {loading ? (
+          <Loading label="正在铺开课件地图…" block />
+        ) : total === 0 ? (
+          <div className="cw-empty"><p className="empty-note">暂无可用内容</p></div>
+        ) : view === 'list' ? (
+          <div className="cw-list">
+            <div className="cw-list-inner">
+              {groups.map((g) => (
+                <section key={g.name} aria-labelledby={`cw-group-${g.name}`} style={{ '--dot': g.color }}>
+                  <h2 className="cw-group-title" id={`cw-group-${g.name}`}><i aria-hidden="true" />{g.name}<b>{g.items.length}</b></h2>
+                  <ul className="cw-items">
+                    {g.items.map((c) => {
+                      const description = shown(c.description, '暂无描述');
+                      return (
+                        <li key={c.id}>
+                          <Link className="cw-item" to={`/courseware/${c.id}`}>
+                            <span className="cw-item-title">{c.title}</span>
+                            {description && description !== c.title && <span className="cw-item-desc">{description}</span>}
+                          </Link>
+                        </li>
+                      );
+                    })}
+                  </ul>
+                </section>
+              ))}
             </div>
-          )}
-        </motion.div>
+          </div>
+        ) : (
+          <div className="cw-stage-inner">
+            <ReactFlowProvider>
+              <ReactFlow
+                nodes={nodes}
+                edges={edges}
+                onNodesChange={onNodesChange}
+                onEdgesChange={onEdgesChange}
+                onNodeClick={onNodeClick}
+                nodeTypes={nodeTypes}
+                fitView
+                minZoom={0.2}
+                maxZoom={4}
+                proOptions={{ hideAttribution: true }}
+              >
+                <MiniMap
+                  pannable
+                  zoomable
+                  ariaLabel="课件地图缩略图"
+                  nodeColor={(n) => CATEGORY_COLORS[n.data?.category] || '#CDBFA9'}
+                  nodeStrokeColor="#FFFDF8"
+                  nodeBorderRadius={6}
+                  maskColor="rgba(238, 231, 218, 0.62)"
+                  style={{ right: 12, bottom: 12, width: 180, height: 120 }}
+                />
+                <Controls position="bottom-right" showInteractive={false} showZoom={true} showFitView={true} style={{ right: 16, bottom: 140 }} />
+                <Background color="#D8CDBA" variant="dots" gap={18} size={1.2} />
+              </ReactFlow>
+              <OverlayCards
+                cards={openCards}
+                onNavigate={(id) => navigate(`/courseware/${id}`)}
+                onClose={(id) => setOpenCards((prev) => prev.filter((c) => c.id !== id))}
+              />
+            </ReactFlowProvider>
+          </div>
+        )}
       </div>
     </div>
   );

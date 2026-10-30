@@ -16,59 +16,24 @@ function CoursewareNode({ data }) {
       <Handle id="bottom" type="target" position={Position.Bottom} isConnectable={false} style={{ opacity: 0, pointerEvents: 'none' }} />
       <Handle id="left" type="target" position={Position.Left} isConnectable={false} style={{ opacity: 0, pointerEvents: 'none' }} />
 
-      <div style={{ position: 'relative', textAlign: 'center', overflow: 'visible' }}>
-        {color && (
-          <div
-            style={{
-              position: 'absolute',
-              top: -10,
-              left: '50%',
-              transform: 'translateX(-50%)',
-              width: 12,
-              height: 12,
-              borderRadius: '50%',
-              background: color,
-              pointerEvents: 'none',
-            }}
-          />
-        )}
+      {/* 外观在 src/styles/reactflow-overrides.css：圆点是分类色，右上角的小图标说明点击后会打开页面或另一份课件 */}
+      <div className="cw-node" style={color ? { '--dot': color } : undefined}>
+        {color && <span className="cw-node-dot" aria-hidden="true" />}
         {data?.link && (
-          <svg
-            xmlns="http://www.w3.org/2000/svg"
-            viewBox="0 0 24 24"
-            fill="none"
-            style={{
-              position: 'absolute',
-              top: -10,
-              right: -10,
-              width: 14,
-              height: 14,
-              opacity: 0.85,
-              pointerEvents: 'none',
-            }}
-          >
-            <path d="M18 13v6a2 2 0 0 1-2 2H6a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h6" stroke="#3b82f6" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" />
-            <path d="M15 3h6v6" stroke="#3b82f6" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" />
-            <path d="M10 14L21 3" stroke="#3b82f6" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" />
-          </svg>
+          <span className="cw-node-icon" aria-hidden="true">
+            <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.4" strokeLinecap="round" strokeLinejoin="round">
+              <path d="M18 13v6a2 2 0 0 1-2 2H6a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h6" />
+              <path d="M15 3h6v6" />
+              <path d="M10 14L21 3" />
+            </svg>
+          </span>
         )}
         {data?.path && (
-          <svg
-            xmlns="http://www.w3.org/2000/svg"
-            viewBox="0 0 24 24"
-            fill="#3b82f6"
-            style={{
-              position: 'absolute',
-              top: -10,
-              right: -10,
-              width: 14,
-              height: 14,
-              opacity: 0.85,
-              pointerEvents: 'none',
-            }}
-          >
-            <path d="M2 12l20-10-8 10 8 10L2 12z" transform="rotate(135 12 12)" />
-          </svg>
+          <span className="cw-node-icon" aria-hidden="true">
+            <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor">
+              <path d="M8 5.5v13a1 1 0 0 0 1.53.85l10.2-6.5a1 1 0 0 0 0-1.7L9.53 4.65A1 1 0 0 0 8 5.5z" />
+            </svg>
+          </span>
         )}
         <div>{data?.label}</div>
       </div>

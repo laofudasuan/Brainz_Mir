@@ -9,13 +9,19 @@ import 'reactflow/dist/style.css';
 import '../styles/reactflow-overrides.css';
 import CoursewareNode from '../components/flow/CoursewareNode.jsx';
 import LabelNode from '../components/flow/LabelNode.jsx';
+import Loading from '../components/Loading';
+import useDocumentTitle from '../components/useDocumentTitle';
 
 const nodeTypes = { courseware: CoursewareNode, label: LabelNode };
+const EDGE_COLOR = '#8A7C66';
+// 课件页文件名（如 Basic/Binary-Search.mdx）只取最后一段作为按钮文字
+const pageLabel = (value) => String(value).split('/').pop().replace(/[-_]+/g, ' ');
 
 const CoursewareDetail = () => {
   const { id } = useParams();
   const navigate = useNavigate();
   const [courseware, setCourseware] = useState(null);
+  useDocumentTitle(courseware?.title || '算法课件');
  
   // Exit animation variants
   const [exitVariants, setExitVariants] = useState({ opacity: 0 });
@@ -329,7 +335,6 @@ const CoursewareDetail = () => {
               position: { x: pageDef.x || 0, y: pageDef.y || 0 },
               data: { label, path: pageDef.path || null, link: pageDef.link || null },
               draggable: false,
-              style: { borderRadius: 12, border: '2px solid #e6e6e6ff', color: '#000000', fontWeight: 700, padding: '8px 12px' },
               className: 'courseware-node'
             });
           }
@@ -395,8 +400,8 @@ const CoursewareDetail = () => {
               sourceHandle: e.sourceSide || null,
               targetHandle: e.targetSide || null,
               label: e.label || undefined,
-              style: { stroke: '#A0AEC0', strokeWidth: 3 },
-              markerEnd: { type: MarkerType.ArrowClosed, color: '#A0AEC0' }
+              style: { stroke: EDGE_COLOR, strokeWidth: 2 },
+              markerEnd: { type: MarkerType.ArrowClosed, color: EDGE_COLOR }
             });
           });
           setPageComponents([]);
@@ -499,39 +504,23 @@ const CoursewareDetail = () => {
 
   if (loading) {
     return (
-      <motion.div 
-        className="min-h-screen pt-32 pb-20 container mx-auto px-4"
-        initial={{ opacity: 0 }}
-        animate={{ opacity: 1 }}
-        transition={{ duration: 0.8, ease: "easeOut" }}
-      >
-        <div className="flex justify-center items-center h-64">
-          <div className="animate-spin rounded-full h-12 w-12 border-t-2 border-b-2 border-primary"></div>
-        </div>
-      </motion.div>
+      <div className="page">
+        <Loading label="正在打开课件…" block />
+      </div>
     );
   }
 
   if (error || !courseware) {
     return (
-      <motion.div 
-        className="min-h-screen pt-32 pb-20 container mx-auto px-4"
-        initial={{ opacity: 0 }}
-        animate={{ opacity: 1 }}
-        transition={{ duration: 0.8, ease: "easeOut" }}
-      >
-        <div className="text-center py-12 bg-gray-50 rounded-lg">
-          <h3 className="text-xl font-bold mb-4">课件不存在或已被删除</h3>
-          <motion.button
-            whileHover={{ scale: 1.05 }}
-            whileTap={{ scale: 0.95 }}
-            onClick={goBackToCoursewareList}
-            className="px-8 py-3 bg-primary text-white rounded-md text-lg font-medium hover:bg-primary/90 transition-all duration-300 shadow-lg"
-          >
-            返回课件列表
-          </motion.button>
+      <div className="page lost">
+        <h1 className="page-title">课件不存在或已被删除</h1>
+        <p className="lead">链接可能有误，可以回到课件地图重新找找。</p>
+        <div className="hero-actions">
+          <button type="button" onClick={goBackToCoursewareList} className="btn btn-primary">
+            <span className="arrow arrow--back" aria-hidden="true">←</span> 返回课件列表
+          </button>
         </div>
-      </motion.div>
+      </div>
     );
   }
 
@@ -539,34 +528,29 @@ const CoursewareDetail = () => {
 
   // 始终渲染导航页，子页面以叠加层形式展示
   return (
-    <div className="fixed inset-0 overflow-hidden bg-white">
+    <div className="cw-detail">
       <div className="w-full h-full">
-        <div className="absolute top-4 right-4 flex flex-col items-end gap-2 z-40">
-          <button 
-            onClick={goBackToCoursewareList}
-            className="bg-white text-gray-800 p-3 rounded-full shadow-lg hover:bg-gray-100 transition-colors"
-            aria-label="返回"
-          >
-            <svg className="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
+        <div className="float-bar">
+          <button type="button" onClick={goBackToCoursewareList} className="float-btn" aria-label="返回课件地图">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
+              <path d="M15 18l-6-6 6-6" />
             </svg>
+            <span className="label">课件地图</span>
           </button>
-          <button
-            onClick={renderCombinedPages}
-            className="bg-white text-gray-800 p-3 rounded-full shadow-lg hover:bg-gray-100 transition-colors"
-            aria-label="合并渲染全部页面"
-          >
-            <svg xmlns="http://www.w3.org/2000/svg" className="h-6 w-6" viewBox="0 0 24 24" fill="none" stroke="currentColor">
-              <rect x="4" y="5" width="16" height="14" rx="2" ry="2" strokeWidth="2" />
+          <button type="button" onClick={renderCombinedPages} className="float-btn" aria-label="合并渲染全部页面">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
+              <rect x="4" y="4" width="16" height="16" rx="2.5" />
+              <path d="M8 9h8M8 13h8M8 17h5" />
             </svg>
+            <span className="label">全部页面</span>
           </button>
         </div>
         {mapMode ? (
           <motion.div
-            className="page-content w-full h-full max-w-none"
+            className="w-full h-full max-w-none"
             initial={{ opacity: 0 }}
             animate={{ opacity: 1 }}
-            transition={{ duration: 0.8, ease: 'easeOut' }}
+            transition={{ duration: 0.76, ease: [0.22, 0.61, 0.36, 1] }}
             variants={containerVariants}
           >
             <div className="w-full h-full overflow-hidden relative">
@@ -583,30 +567,31 @@ const CoursewareDetail = () => {
                   maxZoom={4}
                   proOptions={{ hideAttribution: true }}
                 >
-                  <Background color="#f3f4f6" variant="dots" gap={16} size={1} />
+                  <Background color="#D8CDBA" variant="dots" gap={18} size={1.2} />
                 </ReactFlow>
               </ReactFlowProvider>
             </div>
           </motion.div>
         ) : (
-          <div className="min-h-full flex flex-col items-center justify-center container mx-auto px-4 pt-32 pb-32">
-            <motion.div 
-              className="max-w-3xl mx-auto text-center"
+          <div className="cw-intro">
+            <motion.div
+              className="cw-intro-inner"
               initial={{ opacity: 0 }}
               animate={{ opacity: 1 }}
             >
-              <h1 className="text-5xl font-bold mb-6">{courseware.title || '未命名课件'}</h1>
-              <p className="text-xl text-gray-600 mb-8">{courseware.description || '暂无描述'}</p>
-              <div className="flex flex-wrap justify-center gap-6 text-lg text-gray-500 mb-16">
-                <span>作者: {courseware.author || '未知'}</span>
-                <span>创建时间: {courseware.createdAt || '未知'}</span>
+              <p className="eyebrow">算法课件</p>
+              <h1>{courseware.title || '未命名课件'}</h1>
+              {courseware.description && courseware.description !== courseware.title && <p className="cw-intro-desc">{courseware.description}</p>}
+              <div className="cw-intro-meta">
+                <span>作者：{courseware.author || '未知'}</span>
+                <span>创建时间：{courseware.createdAt || '未知'}</span>
               </div>
-              <div className="flex flex-wrap justify-center gap-4">
+              {pages.length === 0 && <p className="empty-note">这份课件暂时还没有可以打开的页面。</p>}
+              <div className="cw-pages">
                 {pages.map((p, index) => (
-                  <motion.button
+                  <button
+                    type="button"
                     key={index}
-                    whileHover={{ scale: 1.05 }}
-                    whileTap={{ scale: 0.95 }}
                     onClick={async () => {
                       if (!p?.path) return;
                       let matchedPath = null;
@@ -624,10 +609,10 @@ const CoursewareDetail = () => {
                         setCurrentPage(0);
                       } catch {}
                     }}
-                    className="px-10 py-4 bg-primary text-white rounded-md text-lg font-medium hover:bg-primary/90 transition-all duration-300 shadow-lg"
+                    className="cw-page-btn"
                   >
-                    {p.id || `页面 ${index + 1}`}
-                  </motion.button>
+                    <b>{String(index + 1).padStart(2, '0')}</b>{p.id ? pageLabel(p.id) : `页面 ${index + 1}`}
+                  </button>
                 ))}
               </div>
             </motion.div>
@@ -638,43 +623,52 @@ const CoursewareDetail = () => {
       <AnimatePresence>
         {showExportOptions && (
           <motion.div
-            className="fixed inset-0 z-[60] flex items-center justify-center bg-black/50 backdrop-blur-sm"
+            key="export-options"
+            className="dialog-backdrop"
             initial={{ opacity: 0 }}
             animate={{ opacity: 1 }}
             exit={{ opacity: 0 }}
             onClick={() => setShowExportOptions(false)}
+            onKeyDown={e => { if (e.key === 'Escape') setShowExportOptions(false); }}
           >
-            <motion.div 
-              className="bg-white p-6 rounded-lg shadow-xl max-w-sm w-full mx-4"
-              initial={{ scale: 0.9, opacity: 0 }}
-              animate={{ scale: 1, opacity: 1 }}
-              exit={{ scale: 0.9, opacity: 0 }}
+            <motion.div
+              className="dialog"
+              role="dialog"
+              aria-modal="true"
+              aria-labelledby="export-title"
+              initial={{ y: 8, opacity: 0 }}
+              animate={{ y: 0, opacity: 1 }}
+              exit={{ y: 4, opacity: 0 }}
               onClick={e => e.stopPropagation()}
             >
-              <h3 className="text-xl font-bold mb-4 text-gray-800">导出选项</h3>
-              <p className="text-gray-600 mb-6">是否展开所有折叠内容？</p>
-              <div className="flex flex-col gap-3">
+              <h3 id="export-title">导出选项</h3>
+              <p>是否展开所有折叠内容？</p>
+              <div className="dialog-actions">
                 <button
+                  type="button"
+                  autoFocus
                   onClick={() => {
                     setShowExportOptions(false);
                     performExport(true);
                   }}
-                  className="w-full py-2 bg-primary text-white rounded-md hover:bg-primary/90 transition-colors"
+                  className="btn btn-primary"
                 >
                   是 (展开所有)
                 </button>
                 <button
+                  type="button"
                   onClick={() => {
                     setShowExportOptions(false);
                     performExport(false);
                   }}
-                  className="w-full py-2 bg-gray-100 text-gray-800 rounded-md hover:bg-gray-200 transition-colors"
+                  className="btn btn-quiet"
                 >
                   否 (隐藏所有)
                 </button>
                 <button
+                  type="button"
                   onClick={() => setShowExportOptions(false)}
-                  className="w-full py-2 text-gray-500 hover:text-gray-700 transition-colors"
+                  className="btn"
                 >
                   取消
                 </button>
@@ -684,99 +678,94 @@ const CoursewareDetail = () => {
         )}
         {isExporting && (
           <motion.div
-            className="fixed inset-0 z-[60] flex flex-col items-center justify-center bg-black/50 backdrop-blur-sm"
+            key="exporting"
+            className="dialog-backdrop"
             initial={{ opacity: 0 }}
             animate={{ opacity: 1 }}
             exit={{ opacity: 0 }}
           >
-            <div className="bg-white p-6 rounded-lg shadow-xl flex flex-col items-center">
-              <div className="animate-spin rounded-full h-10 w-10 border-4 border-primary border-t-transparent mb-4"></div>
-              <p className="text-lg font-medium text-gray-800">导出中...</p>
+            <div className="dialog">
+              <Loading label="导出中..." />
             </div>
           </motion.div>
         )}
         {showOverlay && (
-          <motion.div 
-            className="fixed inset-0 bg-white z-50"
+          <motion.div
+            key="overlay"
+            className="cw-overlay"
             initial={enterVariants || { opacity: 0 }}
             animate={{ opacity: 1, scale: 1, x: 0, y: 0, transition: { duration: 1.0, ease: "easeInOut" } }}
             exit={exitVariants}
           >
-            <div className="absolute top-4 left-4 z-50 flex flex-col items-start gap-2">
+            <div className="float-bar float-bar--left">
               <button
+                type="button"
                 onClick={() => setShowToc(v => !v)}
-                className="bg-white text-gray-800 p-3 rounded-full shadow-lg hover:bg-gray-100 transition-colors hidden lg:inline-flex"
+                className="float-btn toc-toggle"
                 aria-label="切换目录"
+                aria-expanded={showToc}
               >
-                <svg xmlns="http://www.w3.org/2000/svg" className="h-6 w-6" viewBox="0 0 24 24" fill="none" stroke="currentColor">
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M4 6h16M4 12h10M4 18h16" />
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
+                  <path d="M4 6h16M4 12h10M4 18h16" />
                 </svg>
+                <span className="label">目录</span>
               </button>
             </div>
-            <div className="absolute top-4 right-4 z-50 flex flex-col items-end gap-2">
+            <div className="float-bar">
               <button
+                type="button"
                 onClick={goBackToMainPage}
-                className="bg-white text-gray-800 p-3 rounded-full shadow-lg hover:bg-gray-100 transition-colors"
+                className="float-btn"
                 aria-label="返回地图"
               >
-                <svg className="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 19l-7-7 7-7" />
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
+                  <path d="M15 18l-6-6 6-6" />
                 </svg>
+                <span className="label">返回地图</span>
               </button>
               <button
+                type="button"
                 onClick={() => setShowExportOptions(true)}
-                className="bg-white text-gray-800 p-3 rounded-full shadow-lg hover:bg-gray-100 transition-colors"
+                className="float-btn"
                 aria-label="导出 PDF"
               >
-                <svg xmlns="http://www.w3.org/2000/svg" className="h-6 w-6" viewBox="0 0 24 24" fill="none" stroke="currentColor">
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M12 16v-8m0 8l-3-3m3 3l3-3M5 20h14a2 2 0 0 0 2-2V6a2 2 0 0 0-2-2H5a2 2 0 0 0-2 2v12a2 2 0 0 0 2 2z" />
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
+                  <path d="M12 4v11m0 0l-4-4m4 4l4-4M5 20h14" />
                 </svg>
+                <span className="label">导出 PDF</span>
               </button>
             </div>
 
             {showToc && (
-              <motion.div 
-                ref={tocRef}
-                className="absolute top-20 left-4 bottom-20 w-64 bg-white rounded-lg shadow-lg z-40 overflow-y-auto hidden lg:block"
-                initial={{ opacity: 0, x: -20 }}
-                animate={{ opacity: 1, x: 0 }}
-                transition={{ duration: 0.3 }}
-              >
-                <div className="p-4 border-b border-gray-200">
-                  <h3 className="font-bold text-lg text-gray-800">目录</h3>
-                </div>
-                <div className="p-2">
-                  {toc[currentPage] && toc[currentPage].length > 0 ? (
-                    <ul className="space-y-1">
-                      {toc[currentPage].map((item, index) => (
-                        <li key={index} className={item.level === 1 ? 'pl-3' : item.level === 2 ? 'pl-6' : 'pl-9'}>
-                          <button
-                            onClick={() => scrollToHeading(item.id)}
-                            className={`w-full text-left py-2 rounded hover:bg-gray-100 transition-colors text-sm ${item.level === 1 ? 'text-lg font-bold text-gray-900' : item.level === 2 ? 'font-semibold text-gray-800' : item.level === 3 ? 'text-gray-700' : 'text-gray-600'}`}
-                          >
-                            {item.text}
-                          </button>
-                        </li>
-                      ))}
-                    </ul>
-                  ) : (
-                    <p className="text-gray-500 text-sm p-3">暂无目录信息</p>
-                  )}
-                </div>
-              </motion.div>
+              <div ref={tocRef} className="cw-toc">
+                <div className="cw-toc-head">目录</div>
+                {toc[currentPage] && toc[currentPage].length > 0 ? (
+                  <ul>
+                    {toc[currentPage].map((item, index) => (
+                      <li key={index} className={`toc-l${Math.min(item.level, 4)}`}>
+                        <button type="button" onClick={() => scrollToHeading(item.id)}>
+                          {item.text}
+                        </button>
+                      </li>
+                    ))}
+                  </ul>
+                ) : (
+                  <p className="cw-toc-empty">暂无目录信息</p>
+                )}
+              </div>
             )}
 
-            <div className="w-full h-full overflow-y-auto pt-20 pb-24">
-              <div className="w-[80%] mx-auto relative" style={{ minHeight: '500px' }}>
-                <div 
+            <div className="cw-overlay-scroll">
+              <div className="cw-sheet-wrap">
+                <div
                   ref={contentRef}
                   className="relative overflow-hidden w-full h-full"
                 >
                   {combinedMode ? (
                     <div className="w-full h-full">
                       {combinedComponents.map((Comp, idx) => (
-                        <div key={idx} className="bg-white rounded-lg shadow-lg p-6 md:p-8 mb-8 relative overflow-hidden text-lg md:text-xl font-medium">
-                          <Suspense fallback={<div className="text-center py-8">正在渲染内容...</div>}>
+                        <div key={idx} className="cw-sheet">
+                          <Suspense fallback={<Loading label="正在渲染内容..." block />}>
                             {React.createElement(Comp, { 
                               components: { 
                                 ...headingComponents, 
@@ -800,12 +789,12 @@ const CoursewareDetail = () => {
                         className="w-full h-full"
                         initial={{ opacity: 0 }}
                         animate={{ opacity: 1 }}
-                        exit={{ opacity: 0, scale: 0.8 }}
-                        transition={{ duration: 0.5, ease: "easeInOut" }}
+                        exit={{ opacity: 0, scale: 0.98 }}
+                        transition={{ duration: 0.5, ease: [0.65, 0.05, 0.36, 1] }}
                       >
                         {pageComponents[currentPage] && (
-                          <div className="bg-white rounded-lg shadow-lg p-6 md:p-8 relative overflow-hidden text-lg md:text-xl font-medium">
-                            <Suspense fallback={<div className="text-center py-8">正在渲染内容...</div>}>
+                          <div className="cw-sheet">
+                            <Suspense fallback={<Loading label="正在渲染内容..." block />}>
                               {React.createElement(pageComponents[currentPage], { 
                                 components: { 
                                   ...headingComponents, 

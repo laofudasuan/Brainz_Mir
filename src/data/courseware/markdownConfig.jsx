@@ -1,5 +1,6 @@
 // markdown标题渲染配置
 // 此文件用于配置Markdown中不同级别的标题渲染格式
+// 视觉样式（cw-*、tag-box、code-block 等类名）定义在 src/styles/workbench.css
 import React from 'react';
 import Problem from '../../components/Problem';
 
@@ -11,7 +12,7 @@ let h4Counter = 0;
 
 // 表格样式配置
 export const tableConfig = {
-  className: 'w-full border-collapse my-6',
+  className: 'w-full border-collapse',
   th: {
     className: 'bg-gray-100 px-4 py-2 border border-gray-300 text-left font-semibold'
   },
@@ -23,10 +24,10 @@ export const tableConfig = {
 // 列表样式配置
 export const listConfig = {
   ul: {
-    className: 'list-disc pl-6 my-4 space-y-2',
+    className: 'list-disc pl-6 my-4 space-y-2 marker:text-primary',
   },
   ol: {
-    className: 'list-decimal pl-6 my-4 space-y-2',
+    className: 'list-decimal pl-6 my-4 space-y-2 marker:text-tiger-ink',
   },
   li: {
     className: 'text-gray-800',
@@ -38,7 +39,7 @@ export const listComponents = {
   ul: (props) => {
     const { className, children } = props;
     const config = listConfig.ul;
-    
+
     return (
       <ul className={`${config.className} ${className || ''}`}>
         {children}
@@ -48,7 +49,7 @@ export const listComponents = {
   ol: (props) => {
     const { className, children } = props;
     const config = listConfig.ol;
-    
+
     return (
       <ol className={`${config.className} ${className || ''}`}>
         {children}
@@ -58,7 +59,7 @@ export const listComponents = {
   li: (props) => {
     const { className, children } = props;
     const config = listConfig.li;
-    
+
     return (
       <li className={`${config.className} ${className || ''}`}>
         {children}
@@ -69,7 +70,7 @@ export const listComponents = {
 
 export const imageComponents = {
   img: (props) => {
-    const { title, alt, style, ...rest } = props;
+    const { title, alt, style, className, ...rest } = props;
     const parseSize = (raw) => {
       if (!raw) return null;
       const trimmed = String(raw).trim();
@@ -89,6 +90,7 @@ export const imageComponents = {
     return (
       <img
         {...rest}
+        className={`md-img ${className || ''}`}
         alt={alt || ''}
         loading="lazy"
         style={{
@@ -105,27 +107,27 @@ export const imageComponents = {
 };
 export const headingConfig = {
   h1: {
-    className: 'text-4xl font-bold text-primary text-center my-6 border-t-2 border-b-2 border-primary pt-4 pb-4',
+    className: 'cw-h1',
     center: true
   },
   h2: {
-    className: 'text-3xl font-bold my-6 text-secondary relative pl-6',
+    className: 'cw-h2',
     center: false
   },
   h3: {
-    className: 'text-2xl font-bold my-4 text-black-700 relative',
+    className: 'cw-h3',
     center: false
   },
   h4: {
-    className: 'text-xl font-semibold my-3 text-black-700',
+    className: 'cw-h4',
     center: false
   },
   h5: {
-    className: 'text-lg font-bold my-4 text-black bg-blue-100 border-l-4 border-blue-500 p-2 rounded-r-md',
+    className: 'cw-h5',
     center: false
   },
   h6: {
-    className: 'text-base font-medium my-2 inline-block text-black bg-purple-100 border border-purple-500 px-3 py-1 rounded-xl',
+    className: 'cw-h6',
     center: false
   }
 };
@@ -135,7 +137,7 @@ export const headingComponents = {
   h1: (props) => {
     const { className, children } = props;
     const config = headingConfig.h1;
-    
+
     h3Counter = 0;
     h4Counter = 0;
     return (
@@ -146,11 +148,11 @@ export const headingComponents = {
       </div>
     );
   },
-  
+
   h2: (props) => {
     const { className, children } = props;
     const config = headingConfig.h2;
-    
+
     h3Counter = 0;
     h4Counter = 0;
     return (
@@ -158,58 +160,58 @@ export const headingComponents = {
         <h2 style={{ textAlign: config.center ? 'center' : 'left' }}>
           {children}
         </h2>
-        <div className="h-1 bg-secondary w-20 mt-1 rounded-full"></div>
+        <div className="cw-h2-bar"></div>
       </div>
     );
   },
-  
+
   h3: (props) => {
     const { className, children } = props;
     const config = headingConfig.h3;
-    
+
     // 递增H3计数器，重置H4计数器
     h3Counter++;
     h4Counter = 0;
-    
+
     // 获取带圈数字
     const getCircledNumber = (num) => {
       return `(${num})`;
     };
-    
+
     return (
       <div className={`${config.className} ${className || ''}`}>
         <h3 style={{ textAlign: config.center ? 'center' : 'left' }}>
-          <span className="mr-2 text-primary font-bold">{getCircledNumber(h3Counter)}</span>
+          <span className="cw-num">{getCircledNumber(h3Counter)}</span>
           {children}
         </h3>
       </div>
     );
   },
-  
+
   h4: (props) => {
     const { className, children } = props;
     const config = headingConfig.h4;
-    
+
     // 递增H4计数器
     h4Counter++;
-    
+
     // 生成H4标题序号 (x.y 格式)
     const h4Number = `${h3Counter}-${h4Counter}`;
-    
+
     return (
       <div className={`${config.className} ${className || ''}`}>
         <h4 style={{ textAlign: config.center ? 'center' : 'left' }}>
-          <span className="mr-2 font-mono text-primary font-bold">{h4Number}</span>
+          <span className="cw-num">{h4Number}</span>
           {children}
         </h4>
       </div>
     );
   },
-  
+
   h5: (props) => {
     const { className, children } = props;
     const config = headingConfig.h5;
-    
+
     return (
       <div className={`${config.className} ${className || ''}`}>
         <h5 style={{ textAlign: config.center ? 'center' : 'left' }}>
@@ -218,14 +220,14 @@ export const headingComponents = {
       </div>
     );
   },
-  
+
   h6: (props) => {
     const { className, children } = props;
     const config = headingConfig.h6;
-    
+
     return (
-      <div className="my-2">
-        <h6 style={{ textAlign: config.center ? 'center' : 'left' }} className={`${config.className} ${className || ''}`}>
+      <div className={config.className}>
+        <h6 style={{ textAlign: config.center ? 'center' : 'left' }} className={className || undefined}>
           {children}
         </h6>
       </div>
@@ -235,13 +237,13 @@ export const headingComponents = {
 
 // 带标签的框配置
 export const boxWithTagConfig = {
-  // 框的默认样式 - 使用inline-block使其只包裹文字，增加更多内边距和更大的上下文间距
+  // 框的默认样式 - 宽度只包裹内容（与原先的 inline-block 一致），但作为独立的块排版
   box: {
-    className: 'inline-block relative border border-gray-300 rounded-lg p-4 my-4 bg-gray-50 shadow-sm', // 增加上下边距到my-4
+    className: 'tag-box',
   },
-  // 标签的默认样式 - 调整定位和大小以适应inline-block
+  // 标签的默认样式 - 像书签一样压在边框上
   tag: {
-    className: 'absolute -top-2 -left-2 bg-primary text-white text-xs font-bold px-1.5 py-0.5 rounded',
+    className: 'tag-box-label',
     defaultText: '提示'
   }
 };
@@ -251,15 +253,15 @@ export const boxWithTagComponent = (props) => {
   const { className, children, tag } = props;
   const boxConfig = boxWithTagConfig.box;
   const tagConfig = boxWithTagConfig.tag;
-  
-  // 使用传入的标签文本或默认文本
+
+  // 使用传入的标签文本或默认文本；只含空格的标签（如 tag=" "）表示不显示标签
   const tagText = tag || tagConfig.defaultText;
-  
+
   return (
-    <span className={`${boxConfig.className} ${className || ''}`}>
-      <span className={tagConfig.className}>{tagText}</span>
-      <span className="pt-1">{children}</span>
-    </span>
+    <div className={`${boxConfig.className} ${className || ''}`}>
+      {String(tagText).trim() && <span className={tagConfig.className}>{tagText}</span>}
+      <div className="tag-box-body">{children}</div>
+    </div>
   );
 };
 
@@ -268,17 +270,19 @@ export const tableComponents = {
   table: (props) => {
     const { className, children } = props;
     const config = tableConfig;
-    
+
     return (
-      <table className={`${config.className} ${className || ''}`}>
-        {children}
-      </table>
+      <div className="md-table-wrap">
+        <table className={`${config.className} ${className || ''}`}>
+          {children}
+        </table>
+      </div>
     );
   },
   th: (props) => {
     const { className, children } = props;
     const config = tableConfig.th;
-    
+
     return (
       <th className={`${config.className} ${className || ''}`}>
         {children}
@@ -288,7 +292,7 @@ export const tableComponents = {
   td: (props) => {
     const { className, children } = props;
     const config = tableConfig.td;
-    
+
     return (
       <td className={`${config.className} ${className || ''}`}>
         {children}
@@ -298,29 +302,30 @@ export const tableComponents = {
 };
 
 // 折叠内容组件 - 默认隐藏内容，点击按钮后显示，不使用单独的配置对象
+// 导出 PDF 时依赖 data-collapsible-toggle 及“展开内容紧跟在按钮后面”的结构
 export const CollapsibleComponent = (props) => {
   // 使用React内部状态管理展开/折叠
   const [isOpen, setIsOpen] = React.useState(false);
   const { className, children, title = '点击展开' } = props;
-  
+
   const toggleCollapse = () => {
     setIsOpen(!isOpen);
   };
-  
+
   return (
-    <div className={`my-4 ${className || ''}`}>
-      <div 
-        className="text-base font-medium my-2 inline-block text-black bg-purple-100 border border-purple-500 px-3 py-1 rounded-xl cursor-pointer inline-flex items-center hover:bg-purple-200 transition-colors"
+    <div className={`cw-collapsible ${className || ''}`}>
+      <button
+        type="button"
+        className="cw-toggle"
         onClick={toggleCollapse}
+        aria-expanded={isOpen}
         data-collapsible-toggle="true"
       >
         <span>{title}</span>
-        <span className={`ml-2 transition-transform duration-300 ${isOpen ? 'rotate-180' : ''}`}>
-          ▼
-        </span>
-      </div>
+        <span className="cw-toggle-icon" aria-hidden="true">▼</span>
+      </button>
       {isOpen && (
-        <div>
+        <div className="cw-collapse-body">
           {children}
         </div>
       )}
@@ -335,7 +340,7 @@ export const CodeBlock = (props) => {
   const meta = child?.props?.meta || props.meta || '';
   const metastring = child?.props?.metastring || props.metastring || '';
   const language = (className.match(/language-([\w+#-]+)/) || [])[1] || 'text';
-  
+
   // 解析maxLines参数，默认为10
   const combinedMeta = `${className} ${meta} ${metastring}`;
   const maxLinesMatch = combinedMeta.match(/maxLines\s*(?:=|:)?\s*(\d+)/i);
@@ -354,7 +359,7 @@ export const CodeBlock = (props) => {
   const blockStartRegex = /\/\*/;
   const blockEndRegex = /\*\//;
   let inBlockComment = false;
-  
+
   const renderLine = (line) => {
     let html = escapeHtml(line);
     const placeholders = [];
@@ -372,13 +377,13 @@ export const CodeBlock = (props) => {
       if (endIdx >= 0) {
         const before = html.slice(0, endIdx + 2);
         const after = html.slice(endIdx + 2);
-        html = addPlaceholder(`<span class="text-gray-500">${before}</span>`) + after;
+        html = addPlaceholder(`<span class="tok-comment">${before}</span>`) + after;
         inBlockComment = false;
       } else {
-        return `<span class="text-gray-500">${html}</span>`;
+        return `<span class="tok-comment">${html}</span>`;
       }
     }
-    
+
     // start of block comment
     if (!inBlockComment) {
       const startIdx = html.search(blockStartRegex);
@@ -388,52 +393,52 @@ export const CodeBlock = (props) => {
           const before = html.slice(0, startIdx);
           const middle = html.slice(startIdx, endIdx + 2);
           const after = html.slice(endIdx + 2);
-          html = before + addPlaceholder(`<span class="text-gray-500">${middle}</span>`) + after;
+          html = before + addPlaceholder(`<span class="tok-comment">${middle}</span>`) + after;
         } else {
           const before = html.slice(0, startIdx);
           const middle = html.slice(startIdx);
-          html = before + addPlaceholder(`<span class="text-gray-500">${middle}</span>`);
+          html = before + addPlaceholder(`<span class="tok-comment">${middle}</span>`);
           inBlockComment = true;
           return restorePlaceholders(html);
         }
       }
     }
-    
+
     // one-line comments
     const olc = html.match(oneLineCommentRegex);
     if (olc) {
       const idx = html.indexOf(olc[0]);
       const prefix = html.slice(0, idx);
       const comment = html.slice(idx);
-      html = prefix + addPlaceholder(`<span class="text-gray-500">${comment}</span>`);
+      html = prefix + addPlaceholder(`<span class="tok-comment">${comment}</span>`);
     }
-    
+
     // strings
-    html = html.replace(strRegex, (m) => addPlaceholder(`<span class="text-green-700">${m}</span>`));
-    
+    html = html.replace(strRegex, (m) => addPlaceholder(`<span class="tok-string">${m}</span>`));
+
     // numbers
-    html = html.replace(numRegex, (m) => addPlaceholder(`<span class="text-blue-600">${m}</span>`));
-    
+    html = html.replace(numRegex, (m) => addPlaceholder(`<span class="tok-number">${m}</span>`));
+
     // keywords (only for C/C++)
     if (language.toLowerCase().includes('c')) {
-      html = html.replace(kwRegex, (m) => addPlaceholder(`<span class="text-purple-700 font-semibold">${m}</span>`));
+      html = html.replace(kwRegex, (m) => addPlaceholder(`<span class="tok-keyword">${m}</span>`));
     }
-    
+
     return restorePlaceholders(html);
   };
-  
+
   return (
-    <div className="my-4 rounded-lg border border-gray-300 overflow-hidden" data-code-block="true">
-      <div className="bg-gray-100 text-gray-700 px-3 py-2 text-xs font-mono uppercase tracking-wide">{language}</div>
-      <div className="font-mono text-sm">
-        <div 
+    <div className="code-block" data-code-block="true">
+      <div className="code-block-lang">{language}</div>
+      <div className="code-block-body">
+        <div
           className="grid grid-cols-[48px_1fr]"
           style={lines.length > maxLines ? { maxHeight: `${maxLines * 1.5}rem`, overflowY: 'auto' } : {}}
         >
           {lines.map((line, idx) => (
             <React.Fragment key={idx}>
-              <div className="px-3 py-0.5 text-right text-gray-400 bg-gray-50 select-none">{idx + 1}</div>
-              <div className="px-3 py-0.5 whitespace-pre">
+              <div className="code-ln">{idx + 1}</div>
+              <div className="code-line">
                 <span dangerouslySetInnerHTML={{ __html: renderLine(line) }} />
               </div>
             </React.Fragment>

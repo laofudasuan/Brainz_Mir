@@ -1,48 +1,38 @@
-import { useState, useEffect } from 'react'
-import { motion } from 'framer-motion'
+import { useEffect, useState } from 'react'
 
 const ScrollToTop = () => {
   const [isVisible, setIsVisible] = useState(false)
 
   useEffect(() => {
-    const toggleVisibility = () => {
-      setIsVisible(Math.max(window.pageYOffset, document.body.scrollTop) > 300)
+    let frame = 0
+    const check = () => {
+      frame = 0
+      setIsVisible(Math.max(window.scrollY, document.body.scrollTop) > 640)
     }
-
-    window.addEventListener('scroll', toggleVisibility)
-    document.body.addEventListener('scroll', toggleVisibility)
+    const onScroll = () => { if (!frame) frame = requestAnimationFrame(check) }
+    window.addEventListener('scroll', onScroll, { passive: true })
+    document.body.addEventListener('scroll', onScroll, { passive: true })
     return () => {
-      window.removeEventListener('scroll', toggleVisibility)
-      document.body.removeEventListener('scroll', toggleVisibility)
+      cancelAnimationFrame(frame)
+      window.removeEventListener('scroll', onScroll)
+      document.body.removeEventListener('scroll', onScroll)
     }
   }, [])
 
   const scrollToTop = () => {
-    document.body.scrollTo({ top: 0, behavior: 'smooth' })
-    window.scrollTo({
-      top: 0,
-      behavior: 'smooth'
-    })
+    const behavior = window.matchMedia('(prefers-reduced-motion: reduce)').matches ? 'auto' : 'smooth'
+    document.body.scrollTo({ top: 0, behavior })
+    window.scrollTo({ top: 0, behavior })
+    // 按钮随即隐藏，把键盘焦点交还给正文开头。
+    document.getElementById('main-content')?.focus({ preventScroll: true })
   }
 
   return (
-    isVisible && (
-      <motion.button
-        className="scroll-to-top fixed bottom-8 right-8 p-3 rounded-full bg-primary text-white shadow-lg z-50"
-        onClick={scrollToTop}
-        initial={{ opacity: 0, scale: 0.8 }}
-        animate={{ opacity: 1, scale: 1 }}
-        whileHover={{ scale: 1.1 }}
-        whileTap={{ scale: 0.9 }}
-        exit={{ opacity: 0, scale: 0.8 }}
-        transition={{ duration: 0.3, ease: "easeOut" }}
-        aria-label="回到顶部"
-      >
-        <svg className="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 15l7-7 7 7" />
-        </svg>
-      </motion.button>
-    )
+    <button type="button" className="to-top" data-visible={isVisible ? 'true' : 'false'} onClick={scrollToTop} aria-label="回到顶部">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
+        <path d="M12 19V5M6 11l6-6 6 6" />
+      </svg>
+    </button>
   )
 }
 

@@ -1,9 +1,10 @@
 import React, { useEffect, useState } from 'react'
-import { useNavigate } from 'react-router-dom'
-import { motion } from 'framer-motion'
+import { Link } from 'react-router-dom'
+import Loading from '../components/Loading'
+import useDocumentTitle from '../components/useDocumentTitle'
 
 const VisualizationsIndex = () => {
-  const navigate = useNavigate()
+  useDocumentTitle('交互可视化')
   const [items, setItems] = useState([])
   const [loading, setLoading] = useState(true)
 
@@ -35,46 +36,33 @@ const VisualizationsIndex = () => {
   }, [])
 
   return (
-    <div className="min-h-screen pt-28 pb-16">
-      <motion.div 
-        className="container mx-auto px-4 sm:px-6 lg:px-8"
-        initial={{ opacity: 0, y: 20 }}
-        animate={{ opacity: 1, y: 0 }}
-        transition={{ duration: 0.8, ease: 'easeOut' }}
-      >
-        <h1 className="text-3xl font-bold mb-6">可视化模块</h1>
-        {loading ? (
-          <div className="bg-white rounded-xl shadow-md p-8">
-            <div className="flex justify-center items-center h-40">
-              <div className="animate-spin rounded-full h-12 w-12 border-t-2 border-b-2 border-primary"></div>
-            </div>
-          </div>
-        ) : (
-          <div className="bg-white rounded-xl shadow-md">
-            <ul className="divide-y">
-              {items.map((it) => (
-                <li key={it.slug} className="flex items-center justify-between px-6 py-4 hover:bg-gray-50">
-                  <div className="pr-4">
-                    <div className="text-lg font-semibold">{it.title}</div>
-                    {it.description && (
-                      <div className="text-sm text-gray-600 mt-1">{it.description}</div>
-                    )}
-                  </div>
-                  <button
-                    onClick={() => navigate(`/visualizations/${it.slug}`)}
-                    className="px-4 py-2 rounded-md bg-blue-600 hover:bg-blue-700 text-white"
-                  >
-                    打开
-                  </button>
-                </li>
-              ))}
-            </ul>
-          </div>
-        )}
-      </motion.div>
+    <div className="page">
+      <nav className="crumbs" aria-label="返回"><Link to="/algorithms"><span className="arrow arrow--back" aria-hidden="true">←</span> 算法小屋</Link></nav>
+      <header className="page-intro">
+        <p className="eyebrow">算法小屋 · 交互可视化</p>
+        <h1>可视化模块</h1>
+        <p>动手试试数组、链表、队列，看看数据结构如何运作。</p>
+      </header>
+      {loading ? (
+        <Loading label="正在整理演示…" block />
+      ) : (
+        <ol className="viz-list">
+          {items.map((it, index) => (
+            <li key={it.slug} className="rise" style={{ '--i': index }}>
+              <Link className="viz-row" to={`/visualizations/${it.slug}`}>
+                <span className="viz-index">{String(index + 1).padStart(2, '0')}</span>
+                <span>
+                  <span className="viz-title">{it.title}</span>
+                  {it.description && <span className="viz-desc">{it.description}</span>}
+                </span>
+                <span className="viz-go">打开 <span className="arrow" aria-hidden="true">→</span></span>
+              </Link>
+            </li>
+          ))}
+        </ol>
+      )}
     </div>
   )
 }
 
 export default VisualizationsIndex
-

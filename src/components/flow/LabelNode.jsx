@@ -18,7 +18,7 @@ function LabelNode({ data }) {
       <Handle id="right" type="target" position={Position.Right} isConnectable={false} style={{ opacity: 0 }} />
       <Handle id="bottom" type="target" position={Position.Bottom} isConnectable={false} style={{ opacity: 0 }} />
       <Handle id="left" type="target" position={Position.Left} isConnectable={false} style={{ opacity: 0 }} />
-      
+
       <Handle id="top" type="source" position={Position.Top} isConnectable={false} style={{ opacity: 0 }} />
       <Handle id="right" type="source" position={Position.Right} isConnectable={false} style={{ opacity: 0 }} />
       <Handle id="bottom" type="source" position={Position.Bottom} isConnectable={false} style={{ opacity: 0 }} />
@@ -27,18 +27,19 @@ function LabelNode({ data }) {
   );
 
   if (kind === 'title') {
+    // 与小站标题一致：衬线、墨色，下方一小段虎斑色水平线
     const titleStyle = {
+      fontFamily: 'var(--font-serif)',
       fontSize: 42,
-      fontWeight: 900,
-      letterSpacing: 1.5,
-      backgroundImage: 'linear-gradient(45deg, #f857a6, #ff5858, #ffa751, #ffcd3c, #35e2c2, #43c6ac)',
-      WebkitBackgroundClip: 'text',
-      backgroundClip: 'text',
-      color: 'transparent',
-      backgroundSize: '400% 400%',
-      animation: 'flow 7s ease infinite',
-      WebkitTextStroke: '1.2px rgba(255,255,255,.55)',
-      textShadow: '0 4px 20px rgba(0,0,0,.12)'
+      fontWeight: 600,
+      letterSpacing: 2,
+      lineHeight: 1.3,
+      color: 'var(--ink)',
+      paddingBottom: 12,
+      backgroundImage: 'linear-gradient(var(--tiger), var(--tiger))',
+      backgroundRepeat: 'no-repeat',
+      backgroundSize: '56px 3px',
+      backgroundPosition: '50% 100%'
     };
     return (
       <div style={{ ...base, ...titleStyle }}>
@@ -47,11 +48,11 @@ function LabelNode({ data }) {
       </div>
     );
   }
-  
+
   if (kind === 'annotation') {
     const annotationStyle = {
       fontSize: data.fontSize || 14,
-      color: data.color || '#000',
+      color: data.color || 'var(--ink-2)',
       fontWeight: 500,
       textAlign: 'left'
     };
@@ -63,7 +64,7 @@ function LabelNode({ data }) {
     );
   }
 
-  const descStyle = { fontSize: 18, fontWeight: 500, color: '#374151', textShadow: '0 1px 2px rgba(0,0,0,0.04)', maxWidth: 520, textAlign: 'left' };
+  const descStyle = { fontSize: 18, fontWeight: 400, lineHeight: 1.85, color: 'var(--ink-2)', maxWidth: 520, textAlign: 'left' };
   return (
     <div style={{ ...base, ...descStyle }}>
       {handles}

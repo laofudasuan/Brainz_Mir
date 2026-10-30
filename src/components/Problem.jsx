@@ -81,14 +81,14 @@ const Problem = ({ id, ...props }) => {
 
   if (error) {
     return (
-      <div className="p-4 my-4 border border-red-300 bg-red-50 text-red-700 rounded-md">
+      <div className="notice notice--error my-4" role="alert">
         {error}
       </div>
     );
   }
 
   if (!Component) {
-    return <div className="text-gray-500 my-4">加载题目中...</div>;
+    return <div className="breath my-4" role="status">加载题目中...</div>;
   }
 
   return (

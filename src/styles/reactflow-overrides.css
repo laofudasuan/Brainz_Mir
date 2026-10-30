@@ -1,13 +1,72 @@
+/* React Flow 在节点外层用行内 transform 定位，所以悬停的上浮效果放在内层卡片 .cw-node 上。 */
 .react-flow__node.courseware-node {
-  transition: transform 160ms ease, box-shadow 160ms ease;
-  will-change: transform, box-shadow;
+  padding: 0;
+  border: 0;
+  background: transparent;
   cursor: pointer !important;
 }
 
-.react-flow__node.courseware-node:hover {
-  transform: scale(1.06);
-  box-shadow: 0 12px 24px rgba(59, 130, 246, 0.22), 0 8px 10px rgba(59, 130, 246, 0.16);
-  cursor: pointer !important;
+.react-flow__node.courseware-node:focus-visible {
+  outline: none;
+}
+
+.cw-node {
+  position: relative;
+  padding: 8px 14px;
+  border: 1px solid var(--line-strong);
+  border-radius: 12px;
+  background: var(--surface);
+  box-shadow: var(--shadow-soft);
+  color: var(--ink);
+  font-weight: 600;
+  letter-spacing: .02em;
+  text-align: center;
+  overflow: visible;
+  transition: transform var(--t-calm) var(--ease), border-color var(--t-calm) var(--ease), box-shadow var(--t-calm) var(--ease);
+}
+
+.react-flow__node.courseware-node:hover .cw-node {
+  transform: translateY(-2px);
+  border-color: var(--dot, var(--sprout));
+  box-shadow: var(--shadow-lift);
+}
+
+.react-flow__node.courseware-node:focus-visible .cw-node {
+  outline: 2px solid var(--sprout);
+  outline-offset: 3px;
+}
+
+.cw-node-dot {
+  position: absolute;
+  top: -6px;
+  left: 50%;
+  width: 12px;
+  height: 12px;
+  margin-left: -6px;
+  border: 2px solid var(--paper);
+  border-radius: 50%;
+  background: var(--dot);
+  pointer-events: none;
+}
+
+.cw-node-icon {
+  position: absolute;
+  top: -9px;
+  right: -9px;
+  display: grid;
+  place-items: center;
+  width: 19px;
+  height: 19px;
+  border: 1px solid var(--line-strong);
+  border-radius: 50%;
+  background: var(--surface);
+  color: var(--sprout);
+  pointer-events: none;
+}
+
+.cw-node-icon svg {
+  width: 11px;
+  height: 11px;
 }
 
 .react-flow__node.label-node {
@@ -17,7 +76,6 @@
   pointer-events: none;
 }
 .react-flow__node.label-node:hover {
-  transform: none;
   box-shadow: none;
   cursor: default;
 }
@@ -30,9 +88,50 @@
 .react-flow__node.courseware-node:active {
   cursor: pointer !important;
 }
+
+.react-flow__edge-text {
+  fill: var(--ink-2);
+  font-size: 12px;
+}
+
+.react-flow__edge-textbg {
+  fill: var(--paper);
+}
+
 .react-flow__controls {
   display: flex;
   flex-direction: row;
   align-items: center;
   gap: 6px;
+  box-shadow: none;
+}
+
+.react-flow__controls-button {
+  box-sizing: border-box;
+  width: 34px;
+  height: 34px;
+  padding: 0;
+  border: 1px solid var(--line-strong);
+  border-radius: 10px;
+  background: var(--surface);
+  color: var(--ink-2);
+  transition: background-color var(--t-calm) var(--ease), border-color var(--t-calm) var(--ease);
+}
+
+.react-flow__controls-button:hover {
+  border-color: var(--sprout);
+  background: var(--sprout-soft);
+}
+
+.react-flow__controls-button svg {
+  max-width: 13px;
+  max-height: 13px;
+  fill: currentColor;
+}
+
+.react-flow__minimap {
+  overflow: hidden;
+  border: 1px solid var(--line);
+  border-radius: var(--radius-m);
+  background: var(--surface);
 }

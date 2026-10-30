@@ -111,7 +111,7 @@ const TreeAlgorithmVisualization = forwardRef(({
         {isLoading ? (
           <div className="w-full h-[500px] flex items-center justify-center bg-gray-50">
             <div className="text-center">
-              <div className="inline-block animate-spin rounded-full h-8 w-8 border-t-2 border-b-2 border-blue-500 mb-2"></div>
+              <div className="inline-block animate-spin rounded-full h-8 w-8 border-t-2 border-b-2 border-primary mb-2"></div>
               <p className="text-gray-600">加载树数据中...</p>
             </div>
           </div>
@@ -303,8 +303,8 @@ const TreeAlgorithmVisualization = forwardRef(({
                               : config.isOneTime && clickedButtons.has(config.id)
                                 ? 'bg-gray-900 text-white cursor-not-allowed'
                                 : config.type === 'modal' 
-                                  ? 'bg-blue-600 hover:bg-blue-700 text-white'
-                                  : 'bg-green-600 hover:bg-green-700 text-white'
+                                  ? 'bg-inkblue hover:bg-inkblue-deep text-white'
+                                  : 'bg-primary hover:bg-sprout-deep text-white'
                           )} block relative overflow-hidden group`}
                           title={config.type === 'modal' ? '点击打开模态框' : config.isOneTime ? '一次性操作，点击后变为黑色且不可再点击' : '直接操作当前画布'}
                         >
