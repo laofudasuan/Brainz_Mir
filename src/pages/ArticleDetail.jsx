@@ -2,7 +2,7 @@ import { Children, Component, Suspense, isValidElement, useRef } from 'react'
 import { Link, useParams } from 'react-router-dom'
 import ReadingProgress from '../components/ReadingProgress'
 import useDocumentTitle from '../components/useDocumentTitle'
-import { articles } from '../data/articles'
+import { articles, articleBacklinks } from '../data/articles'
 import { categoryKey, neighbors, sourceHost } from '../data/articleModel'
 import { blog } from '../data/blog'
 import { imageComponents, boxWithTagComponent, CodeBlock } from '../data/courseware/markdownConfig'
@@ -62,6 +62,7 @@ export default function ArticleDetail() {
   const updated = article.updated && article.updated !== article.date ? article.updated : ''
   const host = article.sourceUrl ? sourceHost(article.sourceUrl) : ''
   const { newer, older } = neighbors(articles, article.id)
+  const backlinks = articleBacklinks.get(article.id) || []
 
   return <article key={article.id} ref={readingRef} className={`page page--reading cat--${categoryKey(article.category)}`}>
     <ReadingProgress target={readingRef} />
@@ -101,6 +102,15 @@ export default function ArticleDetail() {
 
         <footer className="article-foot">
           <p className="sign-off">写到这里，下次再聊。</p>
+          {backlinks.length > 0 && <section className="article-backlinks" aria-labelledby="backlinks-title">
+            <h2 id="backlinks-title">引用这篇文章</h2>
+            <ul>
+              {backlinks.map(reference => <li key={reference.id}>
+                <Link className="text-link" to={'/articles/' + encodeURIComponent(reference.id)}>{reference.title}</Link>
+                {reference.date && <time dateTime={reference.date}>{reference.date}</time>}
+              </li>)}
+            </ul>
+          </section>}
           {(newer || older) && <nav className="neighbors" aria-label="相邻文章">
             {older && <Link className="neighbor" to={'/articles/' + encodeURIComponent(older.id)}><span className="neighbor-label">← 更早的一篇</span><span className="neighbor-title">{older.title}</span></Link>}
             {newer && <Link className="neighbor neighbor--newer" to={'/articles/' + encodeURIComponent(newer.id)}><span className="neighbor-label">较新的一篇 →</span><span className="neighbor-title">{newer.title}</span></Link>}

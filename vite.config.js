@@ -6,6 +6,7 @@ import remarkMath from 'remark-math'
 import remarkFrontmatter from 'remark-frontmatter'
 import remarkMdxFrontmatter from 'remark-mdx-frontmatter'
 import rehypeKatex from 'rehype-katex'
+import remarkArticleLinks from './src/data/remarkArticleLinks.js'
 
 function remarkFenceMaxLinesToLangClass() {
   const visit = (node) => {
@@ -23,10 +24,11 @@ function remarkFenceMaxLinesToLangClass() {
 export default defineConfig({
   server: {
     watch: { ignored: ['**/.tmp-*/**'] },
+    fs: { deny: ['.env', '.env.*', '*.{crt,pem}', '**/.git/**'] },
   },
   plugins: [
     mdx({
-      remarkPlugins: [remarkGfm, remarkMath, remarkFrontmatter, remarkMdxFrontmatter, remarkFenceMaxLinesToLangClass],
+      remarkPlugins: [remarkGfm, remarkMath, remarkFrontmatter, remarkMdxFrontmatter, remarkFenceMaxLinesToLangClass, remarkArticleLinks],
       rehypePlugins: [rehypeKatex],
     }),
     react(),

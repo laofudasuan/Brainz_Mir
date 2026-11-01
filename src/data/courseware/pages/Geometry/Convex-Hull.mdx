@@ -231,7 +231,72 @@ void deduplicate(vector<Point>& p) {
 }
 ```
 
-两个不同的点，或者更多点但全部共线时，两条单调链都只剩两个端点，去重拼接后也恰好返回两个点。
+#### Graham 扫描
+
+按值接收点集，排序不会修改调用者的数据。去重后先处理空集和单点，再把最低、同高时最左的点放到首位。其余向量的极角都在 $[0,\pi)$ 内，因此叉积排序满足严格弱序；叉积为零时按距离平方递增，不使用浮点角度或容差。
+
+```cpp maxLines=10
+vector<Point> graham(vector<Point> p) {
+    deduplicate(p);
+    if (p.size() <= 1) return p;
+
+    auto origin = min_element(p.begin(), p.end(), [](Point a, Point b) {
+        return a.y != b.y ? a.y < b.y : a.x < b.x;
+    });
+    iter_swap(p.begin(), origin);
+    const Point o = p.front();
+    sort(p.begin() + 1, p.end(), [o](Point a, Point b) {
+        i128 turn = cross(o, a, b);
+        return turn != 0 ? turn > 0 : dist2(o, a) < dist2(o, b);
+    });
+
+    vector<Point> hull;
+    for (Point c : p) {
+        while (hull.size() >= 2 &&
+               cross(hull[hull.size() - 2], hull.back(), c) <= 0) {
+            hull.pop_back();
+        }
+        hull.push_back(c);
+    }
+    return hull;
+}
+```
+
+输出从最低、同高时最左的基点开始，沿逆时针排列，不重复首点。只有两个不同点或全共线时，输出基点和最远端点；同一射线上的中间点会被后来的远点弹出。
+
+#### Andrew 单调链
+
+`deduplicate` 已完成字典序排序。下壳正向扫描，上壳反向扫描，两遍都剔除右转和共线中间点，再各去掉一个重复端点。
+
+```cpp maxLines=10
+vector<Point> andrew(vector<Point> p) {
+    deduplicate(p);
+    if (p.size() <= 1) return p;
+
+    vector<Point> lower, upper;
+    for (Point c : p) {
+        while (lower.size() >= 2 &&
+               cross(lower[lower.size() - 2], lower.back(), c) <= 0) {
+            lower.pop_back();
+        }
+        lower.push_back(c);
+    }
+    for (auto it = p.rbegin(); it != p.rend(); ++it) {
+        Point c = *it;
+        while (upper.size() >= 2 &&
+               cross(upper[upper.size() - 2], upper.back(), c) <= 0) {
+            upper.pop_back();
+        }
+        upper.push_back(c);
+    }
+    lower.pop_back(); // 去掉 R，它会作为上壳的首点保留
+    upper.pop_back(); // 去掉 L，它已作为下壳的首点保留
+    lower.insert(lower.end(), upper.begin(), upper.end());
+    return lower;
+}
+```
+
+输出从字典序最小的点开始，沿逆时针排列，不重复首点；因此可能与 Graham 的起点不同。两个不同的点，或者更多点但全部共线时，两条单调链都只剩两个端点，去重拼接后也恰好返回两个点，按字典序递增排列。两种实现都只保留拐角，不保留边上的共线中间点。
 
 ### 共线、重复点与精度：先约定，再写代码
 

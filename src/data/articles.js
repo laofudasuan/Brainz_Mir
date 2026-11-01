@@ -1,4 +1,5 @@
 import { createArticleIndex } from './articleModel'
+import { createBacklinkIndex } from './articleReferences'
 
 // Reuse the existing small MDX collection; avoid importing the same module both
 // eagerly for metadata and lazily for its body (which Rollup cannot split).
@@ -7,3 +8,7 @@ const metadata = Object.fromEntries(Object.entries(modules).map(([path, module])
 export const articles = createArticleIndex(metadata).map(article => ({
   ...article, Component: modules[article.path].default,
 }))
+
+export const articleBacklinks = createBacklinkIndex(articles, new Map(articles.map(article => [
+  article.id, modules[article.path].__articleLinkTargets || [],
+])))

@@ -131,7 +131,11 @@ test('the actual three C++ blocks in the lesson compile and match the independen
     assert.equal(compiled.status, 0, compiled.error?.message || compiled.stderr);
     assert.equal(compiled.stderr, '', 'C++ should compile without warnings');
     const large = named([[-1e9, -1e9], [1e9, -1e9], [1e9, 1e9], [-1e9, 1e9], [0, 0], [1e9, 0]]);
-    const inputCases = [...cases, large];
+    // Near-parallel rays differ by a determinant of only 1 at the coordinate limit.
+    const nearParallel = named([[0, 0], [1e9, 1e9 - 1], [1e9 - 1, 1e9 - 2], [-1e9, 1e9], [0, 0]]);
+    const collinear = named([[-1e9, 1e9], [0, 0], [1e9, -1e9], [1, -1], [-1e9, 1e9]]);
+    const rays = named([[0, 0], [1, 0], [4, 0], [1, 1], [3, 3], [-1, 1], [-3, 3], [-2, 2], [0, 0]]);
+    const inputCases = [...cases, large, nearParallel, collinear, rays, [...rays].reverse()];
     const input = `${inputCases.length}\n` + inputCases.map(p => `${p.length}\n${p.map(q => `${q.x} ${q.y}`).join('\n')}`).join('\n');
     const run = spawnSync(executable, [], { input, encoding: 'utf8' });
     assert.equal(run.status, 0, run.stderr);
@@ -143,6 +147,15 @@ test('the actual three C++ blocks in the lesson compile and match the independen
         assert.equal(coordinates.length, count * 2);
         const result = Array.from({ length: count }, (_, j) => ({ x: coordinates[2 * j], y: coordinates[2 * j + 1] }));
         assert.deepEqual(vertexSet(result), vertexSet(oracle(points)));
+        assert.equal(new Set(result.map(key)).size, result.length, 'no repeated vertices or closing point');
+        const expected = oracle(points);
+        if (expected.length) {
+          const first = method === 0
+            ? expected.reduce((a, b) => a.y < b.y || (a.y === b.y && a.x < b.x) ? a : b)
+            : expected[0];
+          const offset = expected.findIndex(p => key(p) === key(first));
+          assert.deepEqual(result.map(key), [...expected.slice(offset), ...expected.slice(0, offset)].map(key), 'exact CCW order and documented starting vertex');
+        }
         if (result.length >= 3) result.forEach((p, j) => assert.ok(points.every(r => bigCross(p, result[(j + 1) % result.length], r) >= 0n)));
       }
     });

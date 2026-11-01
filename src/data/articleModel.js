@@ -1,5 +1,6 @@
 export const categories = ['学习笔记', '折腾记录', '生活随想']
 const dateText = value => value instanceof Date ? value.toISOString().slice(0, 10) : String(value || '')
+export const isArticleHidden = value => [true, 'true', 1, '1'].includes(value)
 
 const normalizeCategory = value => {
   const category = typeof value === 'string' ? value.trim() : ''
@@ -8,7 +9,7 @@ const normalizeCategory = value => {
 
 export function createArticleIndex(metadata) {
   return Object.entries(metadata)
-    .filter(([, meta]) => meta && ![true, 'true', 1, '1'].includes(meta.hidden))
+    .filter(([, meta]) => meta && !isArticleHidden(meta.hidden))
     .map(([path, meta]) => {
       const id = path.split('/').pop().replace(/\.mdx$/, '')
       const date = dateText(meta.date || meta.created)
